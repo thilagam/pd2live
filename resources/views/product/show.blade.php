@@ -206,18 +206,20 @@
 												<div class="form-group">
 													<label class="control-label" for="field-1">{{ $dictionary['prd_product_single_ref_search'] }}</label>
 												</div>
+												{!! Form::open(['url'=>'search-ftp']) !!}
 												<div class="form-group">
 
-													<input type="text" class="form-control" id="field-1" placeholder="Reference ">
-
+													<input type="text" class="form-control" id="field-1" name = 'ref' placeholder="Reference ">
+													{!! Form::hidden('product',Request::segment(2)) !!}
 
 												</div>
 												<div class="form-group">
-													<a href="view_refs_image.php" target="_blank">
+													<!-- <a href="view_refs_image.php" target="_blank">
 														<button class="btn btn-info btn-block">{{ $dictionary['prd_search'] }}</button>
-														</a>
+													</a> -->
+													{!! Form::submit($dictionary['prd_search'] , ['class' => 'btn btn-info btn-block']) !!}
 												</div>
-
+												{!! Form::close()!!}
 
 											</div>
 

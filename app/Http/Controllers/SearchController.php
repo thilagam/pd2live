@@ -20,40 +20,39 @@ class SearchController extends Controller
     		$this->permit=$request->attributes->get('permit');
     	}
     	$this->configs=$request->attributes->get('configs');
-	$this->productHelper = new ProductHelper;
+	    $this->productHelper = new ProductHelper;
     	$this->patternLib= new PatternLib;
     	$this->prodConfigs=array();
-	$this->ftpLib = new FtpLib();
+	    $this->ftpLib = new FtpLib();
 	}
 
 	public function ftp()
 	{
 		$data = Request::all();
-		//echo "<pre>";print_r($data);
-		$images = $this->ftpLib->collectImagesFromFtp($data['product'],$data['folder']);
-		echo "<pre>";print_r($images);
-		/*$dir = public_path()."/uploads/products/".$data['product']."/ftp/".$data['folder']."/";
-		if ($handle = opendir($dir)) {
- 		   while (false !== ($entry = readdir($handle))) {
-        		if ($entry != "." && $entry != "..") {
-            		           		if(isset($this->prodConfigs['pdc_client_pattern']) && $this->prodConfigs['pdc_client_pattern']!='')
-            		{	
-            			$this->patternLib->pattern=$this->prodConfigs['pdc_client_pattern'];
-            			$this->patternLib->subject=$entry;
-            			$part=$this->patternLib->stringExtract(1);
-
-            			
-            		}else{
-            			$part = explode("_",$entry);	
-            			$part = $part;
-            		}
-            		
-            		if(!in_array($part,$reference_listing))	
-            			$reference_listing[] = $part;
-        		}
-    		}
-    		closedir($handle);
-		}
-		echo "<pre>";print_r($reference_listing);*/
+        $images = $this->ftpLib->collectImagesFromFtp($data['product']);
+        $this->prodConfigs=$this->productHelper->getProductDevConfigs($data['product']);
+        $ref = array();
+        foreach($images as $images1){
+            foreach($images1 as $images2){
+                $string = explode("-",$images2);
+                if(isset($string[2])):
+                    array_push($ref,substr($string[2],0,5));
+                endif;
+            }
+        }
+        $refs = explode(",",$data['ref']);
+        $res = array();
+        foreach($refs as $key=>$value){
+            if(in_array($value,$ref)){
+                $referenceInfo=$this->productHelper->refernceInfo($value,$data['product'],$this->prodConfigs);
+                $res[$value]['value']=$value;
+                $res[$value]['pdn']=$referenceInfo['pdn'];
+                $res[$value]['ref']=$referenceInfo['ref'];
+                $res[$value]['gen']=$referenceInfo['gen'];
+                $res[$value]['delivery']=$referenceInfo['delivery'];
+            }
+        }
+        echo "<pre>";print_r($res);
+		
 	}
 }
