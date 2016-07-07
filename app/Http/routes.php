@@ -178,3 +178,8 @@ Route::get('im-ex-port-s/old/importP/{id}','ImportExportOldFiles@pdnImport');
 Route::get('im-ex-port-s/old/importW/{id}','ImportExportOldFiles@writerImport');
 
 Route::get('im-ex-port-s/old/export','ImportExportOldFiles@exportUniqueReferences');
+
+/*Search filters */
+Route::post('search-ftp','SearchController@ftp');
+
+
