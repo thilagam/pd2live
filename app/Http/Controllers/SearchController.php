@@ -43,7 +43,7 @@ class SearchController extends Controller
         $refs = explode(",",$data['ref']);
         $res = array();
         foreach($refs as $key=>$value){
-            if(in_array($value,$ref)){
+            if(in_array(trim($value),$ref)){
                 $referenceInfo=$this->productHelper->refernceInfo($value,$data['product'],$this->prodConfigs);
                 $res[$value]['value']=$value;
                 $res[$value]['pdn']=$referenceInfo['pdn'];
