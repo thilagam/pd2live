@@ -24,7 +24,13 @@
 							</h2>		
 							
 						</div>
-			
+{!! Form::open(['url'=>'search-ftp']) !!}
+						
+						   {!! Form::text('search_ref',null,['placeholder'=>'Search Reference']) !!} 
+						   {!! Form::hidden('product',Request::segment(3))!!}
+						   {!! Form::hidden('folder',$folder_show) !!}
+						   {!! Form::submit('Search', ['class' => 'btn btn-info btn-single']) !!}
+						{!! Form::close() !!}
 						<!-- Sorting Information -->
 						<div class="album-sorting-info">
 							<div class="album-sorting-info-inner clearfix">
@@ -37,10 +43,10 @@
 								Drag images to sort them
 							</div>
 						</div>
-			
+						
 						<!-- Album Images -->
 						<div class="album-images row">
-			
+							
 							<!-- Album Image -->
                           @if(count($reference_listing) > 0)
 							@foreach($reference_listing as $key=>$rl)
@@ -80,6 +86,7 @@
 								   	   <span>{{ $dictionary['all_ftp_folders'] }}<i class="fa-long-arrow-down pull-right"></i> </span>
 									</a>
 								</li>
+								
 								@if(count($folder_listing) > 0)
 									<div class="scrollable" data-max-height="400">
 									@foreach($folder_listing as $fl)		

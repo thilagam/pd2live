@@ -30,14 +30,13 @@ class SearchController extends Controller
 	{
 		$data = Request::all();
 		//echo "<pre>";print_r($data);
-		//$images = $this->ftpLib->collectImagesFromFtp($data['product'],$data['folder']);
-		//echo "<pre>";print_r($images);
-		$dir = public_path()."/uploads/products/".$data['product']."/ftp/".$data['folder']."/";
+		$images = $this->ftpLib->collectImagesFromFtp($data['product'],$data['folder']);
+		echo "<pre>";print_r($images);
+		/*$dir = public_path()."/uploads/products/".$data['product']."/ftp/".$data['folder']."/";
 		if ($handle = opendir($dir)) {
  		   while (false !== ($entry = readdir($handle))) {
         		if ($entry != "." && $entry != "..") {
-            		/* Get Names on Pattern */
-            		if(isset($this->prodConfigs['pdc_client_pattern']) && $this->prodConfigs['pdc_client_pattern']!='')
+            		           		if(isset($this->prodConfigs['pdc_client_pattern']) && $this->prodConfigs['pdc_client_pattern']!='')
             		{	
             			$this->patternLib->pattern=$this->prodConfigs['pdc_client_pattern'];
             			$this->patternLib->subject=$entry;
@@ -55,6 +54,6 @@ class SearchController extends Controller
     		}
     		closedir($handle);
 		}
-		echo "<pre>";print_r($reference_listing);
+		echo "<pre>";print_r($reference_listing);*/
 	}
 }
