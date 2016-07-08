@@ -36,7 +36,7 @@
 			</script>
 			
 			<!-- <form role="forl" id="rootwizard" class="form-wizard" novalidate> -->
-			 {!! Form::open(['url' => 'doEdit/'.Auth::user()->id ,'method'=>'post','id'=>'rootwizard','class'=>'form-wizard validate']) !!}	
+			 {!! Form::open(['url' => 'doEdit/'.Auth::user()->id ,'method'=>'put','id'=>'rootwizard','class'=>'form-wizard validate']) !!}	
 				<ul class="tabs">
 					<li class="active">
 						<a href="#fwv-1" data-toggle="tab">

@@ -373,7 +373,7 @@ class UserController extends Controller {
         $user->email=$users['email'];
 		if(isset($users['password']))
         {
-        	$users->password = bcrypt($users->password);
+        	$user->password = bcrypt($users['password']);
         }
 	  	$user->save();
 

@@ -121,7 +121,7 @@ Route::resource('items','ItemController');
 Route::get('accessDenied','UserController@accessDenied');
 Route::get('profile/{id}','UserController@profile');
 Route::get('editProfile','UserController@editProfile');
-Route::post('doEdit/{id}','UserController@doEdit');
+Route::put('doEdit/{id}','UserController@doEdit');
 
 Route::get('test','ErrandController@test');
 Route::post('userImage','ErrandController@userImageUpload');
