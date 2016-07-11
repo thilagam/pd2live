@@ -141,12 +141,9 @@ class ProductController extends Controller {
 	 */
 	public function show($id)
 	{
-
          if(!$this->checkaccess->productAccessCheck($id))
          		return redirect('accessDenied');
-
-
-		$variablesArray=array();
+        $variablesArray=array();
 		/* Get Product details   */
 		$product = DB::table('cep_products')
                     ->select('prod_id as id' ,
@@ -299,17 +296,18 @@ class ProductController extends Controller {
 
 	   		$mailingList=array();
 	   		$index=0;
-
 	   		$cmUsers=User::with('userPlus')->where('user_parent_id','=',$product->client_id)->get();
 	   		$cmusersArray = array('0'=>'');
 	   		if(!is_null($cmUsers))
 	   		{
 		   		foreach ($cmUsers as $key => $value) {
+		   			if(!is_null($value)):
 		   			if($value['user_plus']['up_first_name']=='' && $value['user_plus']['up_last_name']=='' ){
 		   				$cmusersArray [$value->id]=$value->name;
 		   			}else{
 		   				$cmusersArray [$value->id]=ucfirst($value['user_plus']['up_first_name'])." ".ucfirst($value['user_plus']['up_last_name']);
 		   			}
+		   			endif;
 		   		}
 	   		}
 	   		$variablesArray[]='cmusersArray';
@@ -376,7 +374,6 @@ class ProductController extends Controller {
         $allProductItems = CepItems::where('item_product_id',$id)->where('item_status',1)->get();
         $variablesArray[]= 'allProductItems';
 
-
 		//echo $product_items;
 		/* Add Veriables based on satisfied conditions  */
 		return view('product.show',compact($variablesArray));
@@ -425,7 +422,6 @@ class ProductController extends Controller {
 	{
 		$input = Input::all();
 		$prod=CepProducts::where('prod_id','=',$id)->first();
-		//echo "<pre>"; print_r($_FILES);exit;
 		if(is_null($prod)){
 			$error="Product not presnt";
 			Log::error($error);
@@ -545,7 +541,6 @@ class ProductController extends Controller {
 			$pdnData=CepProductConfigurations::where('pconf_product_id','=',$id)
 									->where('pconf_type','=','pdn')
 									->first();
-
 			/* Create NEW PDN */								
 			if(is_null($pdnData))
 			{
@@ -626,6 +621,7 @@ class ProductController extends Controller {
 			}
 			else
 			{
+
 				/* PDN  Update*/
 				$pdnItem = CepItems::where('item_product_id','=',$id)
 									 ->where('item_url','=','product/pdn/'.$id)->first();
@@ -670,7 +666,6 @@ class ProductController extends Controller {
 			$pdnData=CepProductConfigurations::where('pconf_product_id','=',$id)
 									->where('pconf_type','=','pdn')
 									->first();
-
 
 			if(!is_null($pdnData)){
 				$pdnData->pconf_status=0;

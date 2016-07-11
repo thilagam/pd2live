@@ -182,4 +182,6 @@ Route::get('im-ex-port-s/old/export','ImportExportOldFiles@exportUniqueReference
 /*Search filters */
 Route::post('search-ftp','SearchController@ftp');
 
+Route::post('search-file','SearchController@fileSearch');
+
 

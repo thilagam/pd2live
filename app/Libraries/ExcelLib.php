@@ -5,6 +5,7 @@ use PHPExcel_IOFactory;
 use PHPExcel_Writer_Excel2007;
 use PHPExcel_Writer_Excel5;
 use PHPExcel_Cell;
+use PHPExcel_Style_Fill;
 
 /* Below is the link how I have imported phpexcel library with laravel 5
  *
@@ -108,6 +109,54 @@ class ExcelLib{
 	}
     $writer->save($filename);
   }
+
+  /*
+  *For search reference
+  *
+  */
+  public function writeExcelSearch($arr_data,$filename){
+  $excel = new PHPExcel;
+    $list = $excel->setActiveSheetIndex(0);
+    $rowcounter = 1;
+    $style_header = array(
+          'fill' => array(
+            'type' => PHPExcel_Style_Fill::FILL_SOLID,
+            'color' => array('rgb'=>'E1E0F7'),
+          ),
+          'font' => array(
+            'bold' => true,
+          )
+        );
+    $style_yes = array('fill'=>array('type'=>PHPExcel_Style_Fill::FILL_SOLID ,'color'=>array('rgb'=>'00FF00')));
+    $style_no = array('fill'=>array('type'=>PHPExcel_Style_Fill::FILL_SOLID ,'color'=>array('rgb'=>'FF0000')));
+    foreach($arr_data as $key=>$d){
+        $chr = "A";
+        $row = 1;
+        foreach($d as $d1){
+            $list->getStyle($chr.$row)->applyFromArray( $style_header );
+            $list->setCellValue($chr.$rowcounter,$d1);
+            if($d1 == "Yes"){
+               $list->getStyle($chr.$rowcounter)->applyFromArray($style_yes);
+            }
+            if($d1 == "No"){
+              $list->getStyle($chr.$rowcounter)->applyFromArray($style_no);
+            }
+            $chr++;
+        }
+        $rowcounter++;
+    }
+  if(pathinfo($filename, PATHINFO_EXTENSION) == "xls"){
+       $writer = new PHPExcel_Writer_Excel5($excel);
+  }else if(pathinfo($filename, PATHINFO_EXTENSION) == "xlsx"){
+     $writer = new PHPExcel_Writer_Excel2007($excel);
+  }else{
+    echo "File is Neither XLS Nor XLSX ";
+  }
+    $writer->save($filename);
+    return $filename;
+    
+  }
+
 
    /* writeXlsx function
    *  write Both Type of XLSX or XLS

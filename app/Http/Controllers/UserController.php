@@ -120,6 +120,8 @@ class UserController extends Controller {
 	public function store()
 	{
 		//
+		//echo url();exit;
+
         $newusers = Request::only('name','email','password','password_confirmation','group_id');
         $newusers['email'] = strtolower($newusers['email']); // to avoid confusion of upper and lower case convert all upper to lowercase and then save
         
@@ -171,8 +173,8 @@ class UserController extends Controller {
 
         /* Activity Email Alerts */
 
-        $variable = '{ "EM_FLNAME": "'.$newusers['name'].'","EM_USERNAME": "'.$newusers['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.$this->configs->edit_place_site_url.'" }';
-
+        //$variable = '{ "EM_FLNAME": "'.$newusers['name'].'","EM_USERNAME": "'.$newusers['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.$this->configs->edit_place_site_url.'" }';
+        $variable = '{ "EM_FLNAME": "'.$newusers['name'].'","EM_USERNAME": "'.$newusers['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.url().'" }';
         $option = array(
         				'em_type'=>1,
         				'em_from'=>$this->configs->email_no_reply_user_id,

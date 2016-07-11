@@ -1,3 +1,4 @@
+<?php //echo "<pre>";print_r($prodConfigs);exit;?>
 @extends('../app')
 
 @section('content')
@@ -237,16 +238,18 @@
 												<div class="form-group">
 													<label class="control-label" for="field-1">{{ $dictionary['prd_upload_file_search'] }}</label>
 												</div>
+												{!! Form::open(['url'=>'search-file','files' => true])!!}
 												<div class="form-group">
 
-													<input type="file" class="btn btn-default" id="field-1" placeholder="{{ $dictionary['prd_reference'] }}">
-
+													<input type="file" class="btn btn-default" id="field-1" name ="filesearch" placeholder="{{ $dictionary['prd_reference'] }}">
+													{!! Form::hidden('product',Request::segment(2)) !!}
 
 												</div>
-												<div class="form-group">
+												<!-- <div class="form-group">
 														<button class="btn btn-info btn-block">{{ $dictionary['prd_search'] }}</button>
-												</div>
-
+												</div> -->
+												{!! Form::submit($dictionary['prd_search'] , ['class' => 'btn btn-info btn-block']) !!}
+												{!! Form::close()!!}
 
 											</div>
 
