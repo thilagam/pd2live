@@ -455,7 +455,8 @@ class ProductController extends Controller {
         {
                 return redirect()->back()->withErrors($validateFtp->errors());
         }
-        if($ftpInfo['ftp']==1)
+        //if($ftpInfo['ftp']==1)
+        if(isset($ftpInfo['ftp']))
         {
 	   		$ftpData=CepProductFtp::where('ftp_product_id','=',$id)->first();
 	   		if(is_null($ftpData)){
@@ -535,7 +536,8 @@ class ProductController extends Controller {
         }
 
        
-        if(isset($pdnInfo['pdnradio']) && $pdnInfo['pdnradio']==1)
+        //if(isset($pdnInfo['pdnradio']) && $pdnInfo['pdnradio']==1)
+        if(isset($pdnInfo['pdnradio']))
         {	
         	/* ENABLE if inactive OR ENABLED Update or Create*/		
 			$pdnData=CepProductConfigurations::where('pconf_product_id','=',$id)
@@ -625,6 +627,7 @@ class ProductController extends Controller {
 				/* PDN  Update*/
 				$pdnItem = CepItems::where('item_product_id','=',$id)
 									 ->where('item_url','=','product/pdn/'.$id)->first();
+				//echo "<pre>";print_r($pdnItem);exit;
 		        $file=Input::file('pdn_file');
 		        $upload=array();
 		        if($file)
@@ -696,7 +699,9 @@ class ProductController extends Controller {
                 return redirect()->back()->withErrors($validateRef->errors());
         }
         /* Ref Template File processing */
-        if(isset($refInfo['refradio']) && $refInfo['refradio']){
+        //if(isset($refInfo['refradio']) && $refInfo['refradio'])
+        if(isset($refInfo['refradio']))
+        {
 			$refData=CepProductConfigurations::where('pconf_product_id','=',$id)
 									->where('pconf_type','=','ref')
 									->first();
