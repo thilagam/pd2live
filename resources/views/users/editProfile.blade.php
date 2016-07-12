@@ -152,7 +152,7 @@
 								<div class="form-group">
 								        {!! Form::label($dictionary['cl_dob'], $dictionary['cl_dob']) !!}
 								        <div class="input-group">
-								        	{!! Form::text('dob',$userPlusData->up_dob,['class'=>'form-control datepicker','id'=>'dob','data-format'=>'D, dd MM yyyy','placeholder'=>$dictionary['cl_placeholder_dob']]) !!}
+								        	{!! Form::text('dob',$userPlusData->up_dob,['class'=>'form-control datepicker','id'=>'dob','data-validate'=>'required','data-format'=>'D, dd MM yyyy','placeholder'=>$dictionary['cl_placeholder_dob']]) !!}
 								        	<div class="input-group-addon">
 												<a href="#"><i class="linecons-calendar"></i></a>
 											</div>

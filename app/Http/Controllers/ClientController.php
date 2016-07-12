@@ -231,8 +231,8 @@ class ClientController extends Controller
 
         /* Activity Email Alerts */
 
-        $variable = '{ "EM_FLNAME": "'.$users['name'].'","EM_USERNAME": "'.$users['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.$this->configs->edit_place_site_url.'" }';
-
+        //$variable = '{ "EM_FLNAME": "'.$users['name'].'","EM_USERNAME": "'.$users['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.$this->configs->edit_place_site_url.'" }';
+        $variable = '{ "EM_FLNAME": "'.$users['name'].'","EM_USERNAME": "'.$users['email'].'", "EM_PASSSWORD": "'.$original_password.'", "EM_URL": "'.url().'" }';
         $option = array(
                         'em_type'=>1,
                         'em_from'=>$this->configs->email_no_reply_user_id,
