@@ -236,7 +236,7 @@
 
 											<div class="vertical-top">
 												<div class="form-group">
-													<label class="control-label" for="field-1">{{ $dictionary['prd_upload_file_search'] }}</label>
+													<label class="control-label" for="field-1">{{ $dictionary['prd_upload_file_search'] }}<span>(Only xlsx file)</span></label>
 												</div>
 												{!! Form::open(['url'=>'search-file','files' => true])!!}
 												<div class="form-group">

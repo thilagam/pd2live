@@ -11,10 +11,12 @@ use App\Libraries\ProductHelper;
 use App\Libraries\FtpLib;
 use App\Libraries\ExcelLib;
 use App\Libraries\FileManager;
+use Illuminate\Validation\Factory as ValidatorFactory;
 
 use Request;
 use Crypt;
 use Input;
+use Validator;
 
 class SearchController extends Controller
 {
@@ -110,7 +112,20 @@ class SearchController extends Controller
         $data = Request::all();
         $options = array('name'=>'file_upload','url'=>'products/'.$data['product'].'/search/');
         $file = Input::file('filesearch');
-
+        $validator = Validator::make(
+            [
+                'file'      => $file,
+                'extension' => strtolower($file->getClientOriginalExtension()),
+            ],
+            [
+                'file'          => 'required',
+                'extension'      => 'required|in:xlsx',
+            ]
+        );
+        if($validator->fails())
+        {
+                return redirect()->back()->withInput()->withErrors($validator->errors());
+        }
         $upload=$this->FileManager->simpleUplaod($file,$options);
         $refs=$this->excelObj->readExcel(public_path()."/uploads/".$upload);
         
@@ -172,8 +187,3 @@ class SearchController extends Controller
         endif;
     }
 }
-
-
-
-
-
