@@ -1,4 +1,4 @@
-<?php //echo "<pre>";print_r($prodConfigs);exit;?>
+<?php //echo "<pre>";print_r($dictionary);exit;?>
 @extends('../app')
 
 @section('content')
@@ -447,7 +447,7 @@
 									 </div>
 
 									<div class="form-group">
-										{!! Form::label('','',['class'=>'col-sm-2']) !!}
+										{!! Form::label($dictionary['prd_pdn_ref'],$dictionary['prd_pdn_ref'],['class'=>'col-sm-2 control-label']) !!}
 
 										<div class="col-sm-5">
 											<script type="text/javascript">
@@ -462,7 +462,8 @@
 													});
 												});
 											</script>
-											{!! Form::select('pdn_ref',
+
+											<!-- {!! Form::select('pdn_ref',
 									        			    $alphaRange,
 					        							   	$prodConfigs['pdn']['pconf_reference_id'],
 					        							    [
@@ -472,8 +473,13 @@
 					        								'placeholder'=>$dictionary['placeholder_pdn_ref']
 					        							    ]
 									        			)
-									        !!}
-
+									        !!}-->
+									        <select class="form-control" id="pdn_ref" name="pdn_ref" placeholder="Select Key">
+												<option>{{ $dictionary['prd_item_select_key']  }}</option>
+												@for($i = 1;$i <= 26;$i++)
+														<option value="{{ $i }}" @if(isset($prodConfigs['ref']['pconf_reference_id'] ) && $prodConfigs['ref']['pconf_reference_id'] == $i) selected="selected" @endif >{{ chr($i+64) }}</option>
+												@endfor
+											</select>
 
 										</div>
 									</div>

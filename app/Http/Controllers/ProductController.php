@@ -524,12 +524,18 @@ class ProductController extends Controller {
    		/* PDN Update or Create */
 
    		$pdnInfo = Request::only('pdnradio','path','pdn_ref');
-   		$validatePdn = Validator::make($pdnInfo,[
+   		/*$validatePdn = Validator::make($pdnInfo,[
                     'pdnradio' => 'required',
                     'path'=>'sometimes',
                     'pdn_ref' => 'sometimes'
          ]);
-
+		*/
+		$rules['pdnradio']='required';
+		$rules['path']='sometimes';
+		if($pdnInfo['pdnradio'] == 1){
+			$rules['pdn_ref'] = 'required';
+		}
+		$validatePdn = Validator::make($pdnInfo,$rules);
    		if($validatePdn->fails())
         {
                 return redirect()->back()->withErrors($validatePdn->errors());
@@ -689,11 +695,18 @@ class ProductController extends Controller {
 		/* Ref Update or Create */
    		$refInfo = Request::only('refradio','ref_path','ref_ref');
 			//echo "<pre>"; print_r ($refInfo); exit;
-   		$validateRef = Validator::make($refInfo,[
+   		/*$validateRef = Validator::make($refInfo,[
                     'refradio' => 'required',
                     'ref_path'=>'sometimes',
                     'ref_ref' => 'sometimes'
-         ]);
+                    
+         ]);*/
+   		$rulesRef['refradio'] = 'required';
+   		$rulesRef['ref_path'] = 'sometimes';
+   		if($refInfo['refradio'] == 1){
+   			$rulesRef['ref_ref'] = 'required';
+   		}
+   		$validateRef = Validator::make($refInfo,$rulesRef);
    		if($validateRef->fails())
         {
                 return redirect()->back()->withErrors($validateRef->errors());
