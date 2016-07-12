@@ -78,6 +78,7 @@ class SearchController extends Controller
         }
         else
         {
+            if(!empty($final)):
             foreach($final as $final2)
                 $result[] = $final2;
             $header = array('value'=>'Image','pdn'=>'PDN','ref'=>'REF','gen'=>'GEN','delivery'=>'Delivery');
@@ -95,8 +96,11 @@ class SearchController extends Controller
             }
             $fileName = "singlesearch.xlsx";
             $filePath = public_path()."/uploads/products/".$data['product']."/".$fileName ;
-            $this->excelObj->writeExcelSearch($final_result,$filePath);
-            return redirect()->back();
+            $fname=$this->excelObj->writeExcelSearch($final_result,$filePath);
+            return response()->download($fname);
+            else:
+                return redirect()->back()->with('customError',['The reference does not exist']);
+            endif;
         }
 		
 	}
@@ -144,7 +148,7 @@ class SearchController extends Controller
             }
             
         }
-        
+        if(!empty($final)):
         foreach($final as $final2)
                 $result[] = $final2;
             $final_result[0]['value'] = 'Image';
@@ -162,10 +166,9 @@ class SearchController extends Controller
             $fileName = "filesearch.xlsx";
             $filePath = public_path()."/uploads/products/".$data['product']."/".$fileName ;
             $fname=$this->excelObj->writeExcelSearch($final_result,$filePath);
-            
-            $this->download->simpleDownload(Crypt::encrypt("products/".$data['product']."/".$fileName));
-            //return redirect()->back();
-
-        
+            return response()->download($fname);
+        else:
+            return redirect()->back()->with('customError',['The file does not consist of valid references']);
+        endif;
     }
 }
