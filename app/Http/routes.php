@@ -179,9 +179,11 @@ Route::get('im-ex-port-s/old/importW/{id}','ImportExportOldFiles@writerImport');
 
 Route::get('im-ex-port-s/old/export','ImportExportOldFiles@exportUniqueReferences');
 
-/*Search filters */
+/*Search filters product page*/
 Route::post('search-ftp','SearchController@ftp');
 
 Route::post('search-file','SearchController@fileSearch');
 
 
+/*Global search*/
+Route::post('global-search','SearchController@globalSearch');

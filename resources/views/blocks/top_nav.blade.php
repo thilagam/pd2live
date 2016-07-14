@@ -177,14 +177,15 @@
 
 				<li class="search-form"><!-- You can add "always-visible" to show make the search input visible -->
 
-					<form method="get" action="extra-search.html">
+					<!-- <form method="get" action="extra-search.html"> -->
+					{!! Form::open(['url'=>'global-search']) !!}
 						<input type="text" name="s" class="form-control search-field" placeholder="{{ $dictionary['tn_search'] }}" />
-
-						<button type="submit" class="btn btn-link">
+						
+						 <button type="submit" class="btn btn-link">
 							<i class="linecons-search"></i>
-						</button>
-					</form>
-
+						</button> 
+					</form> 
+					{!! Form::close()!!}
 				</li>
 
 			   @if($permit->module_mailbox)

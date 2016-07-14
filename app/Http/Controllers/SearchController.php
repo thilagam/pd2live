@@ -12,6 +12,7 @@ use App\Libraries\FtpLib;
 use App\Libraries\ExcelLib;
 use App\Libraries\FileManager;
 use Illuminate\Validation\Factory as ValidatorFactory;
+use App\CepProducts;
 
 use Request;
 use Crypt;
@@ -184,6 +185,49 @@ class SearchController extends Controller
             return response()->download($fname);
         else:
             return redirect()->back()->with('customError',['The file does not consist of valid references']);
+        endif;
+    }
+
+    public function globalSearch()
+    {
+        $data = Request::all();
+        $searchVal = explode("@",trim($data['s']));
+        if(isset($searchVal[1])):
+            $product=CepProducts::select('prod_id')->where('prod_name', 'like', '%' . strtolower(trim($searchVal[1])) . '%')->get();
+            $productArray = $product->toArray();
+            if(!empty($productArray))
+            {
+                $images = $this->ftpLib->collectImagesFromFtp($productArray[0]['prod_id']);
+                $this->prodConfigs=$this->productHelper->getProductDevConfigs($productArray[0]['prod_id']);
+                foreach($images as $key=>$value)
+                {
+                    foreach($value as $key1=>$value1)
+                    {
+                        if(isset($this->prodConfigs['pdc_client_pattern']) && $this->prodConfigs['pdc_client_pattern']!='')
+                        {   
+                            $this->patternLib->pattern=$this->prodConfigs['pdc_client_pattern'];
+                            $this->patternLib->subject=$value1;
+                            $part=$this->patternLib->stringExtract(1);
+
+                        }else{
+                            $part = explode("_",$value1);    
+                            $part = $part;
+                        }
+                        $res[$part] = $key;
+                    }
+                }
+                if(array_key_exists(trim($searchVal[0]),$res)){
+                    $referenceInfo=$this->productHelper->refernceInfo($searchVal[0],$productArray[0]['prod_id'],$this->prodConfigs);
+                    return redirect('product/ftp/'.Crypt::encrypt($productArray[0]['prod_id']).'/images/?f='.Crypt::encrypt($res[$searchVal[0]]).'&r='.Crypt::encrypt($searchVal[0]) );
+                }
+                else return redirect()->back()->with('customError',['The reference was not found']);
+            }
+            else
+            {
+                return redirect()->back()->with('customError',['The reference was not found']);
+            }
+        else:
+          return redirect()->back()->with('customError',['Kindly mention the client.Ex:ref@client']);  
         endif;
     }
 }
