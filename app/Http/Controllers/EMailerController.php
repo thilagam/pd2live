@@ -135,7 +135,8 @@ class EMailerController extends Controller {
                 $pagination_value = $this->configs->email_default_pagination_value;
                 switch(true){
                     case (strcmp($id,'sent') == 0):
-                $query = CepEmailMessages::where('em_status',1)->where('em_trash_status',0)->where('em_from',$uid)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                $query = CepEmailMessages::where('em_status',1)->where('em_trash_status','<>',3)->where('em_from',$uid)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                
                 $mail_count = $query->count();
                 $mailbox = $query->simplePaginate($pagination_value);
                 $mailbox->setPath('sent');
@@ -154,7 +155,11 @@ class EMailerController extends Controller {
                 $mailbox = $query->simplePaginate($pagination_value);
                 $mailbox->setPath('draft');
                                 break;*/
-
+                     /* 
+						Author:Thilagam
+						Date:15/7/2016
+						Reason: To fix the trash message issue
+                     */
                     $trash_msgs = CepEmailMessages::where('em_trash_status','<>',0)->get();
                     $trash_msgs_array = $trash_msgs->toArray();
                     $uids_from = array();
