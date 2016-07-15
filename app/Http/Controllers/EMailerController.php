@@ -48,6 +48,7 @@ class EMailerController extends Controller {
                 $uid = Auth::id();
 		$pagination_value = $this->configs->email_default_pagination_value;
 		$query = CepEmailMessages::where('em_status',1)
+					->where('em_trash_status',0)
 					->where('em_to',$uid)
 					->orderBy('em_create_date','desc')
 					->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'));
@@ -134,26 +135,49 @@ class EMailerController extends Controller {
                 $pagination_value = $this->configs->email_default_pagination_value;
                 switch(true){
                     case (strcmp($id,'sent') == 0):
-                $query = CepEmailMessages::where('em_status',1)->where('em_from',$uid)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                $query = CepEmailMessages::where('em_status',1)->where('em_trash_status',0)->where('em_from',$uid)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
                 $mail_count = $query->count();
                 $mailbox = $query->simplePaginate($pagination_value);
                 $mailbox->setPath('sent');
                                 break;
 
                     case (strcmp($id,'draft') == 0):
-                        $query = CepEmailMessages::where('em_status',2)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                        $query = CepEmailMessages::where('em_status',2)->where('em_trash_status',0)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
                 $mail_count = $query->count();
                 $mailbox = $query->simplePaginate($pagination_value);
                 $mailbox->setPath('draft');
                                 break;
 
                     case (strcmp($id,'trash') == 0):
-                        $query = CepEmailMessages::where('em_status',3)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                        /*$query = CepEmailMessages::where('em_status',3)->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
                 $mail_count = $query->count();
                 $mailbox = $query->simplePaginate($pagination_value);
                 $mailbox->setPath('draft');
-                                break;
+                                break;*/
 
+                    $trash_msgs = CepEmailMessages::where('em_trash_status','<>',0)->get();
+                    $trash_msgs_array = $trash_msgs->toArray();
+                    $uids_from = array();
+                    $uids_to = array();
+                    foreach($trash_msgs_array as $trash){
+                    	if(!in_array($trash['em_from'],$uids_from)){
+                    		array_push($uids_from,$trash['em_from']);
+                    	}
+                    	if(!in_array($trash['em_to'],$uids_to)){
+                    		array_push($uids_to,$trash['em_to']);
+                    	}
+                    }
+                    $uid = Auth::id();
+                    if(in_array($uid,$uids_from)){
+                    	$query = CepEmailMessages::whereIn('em_trash_status',[1,3])->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                    }
+                    else{
+                    	$query = CepEmailMessages::whereIn('em_trash_status',[2,3])->select(DB::raw('*,DATE_FORMAT(em_create_date,"%a,%d %M %Y %h:%i %p") as em_dt'))->orderBy('em_create_date','desc');
+                    }
+                    $mail_count = $query->count();
+                    $mailbox = $query->simplePaginate($pagination_value);
+                    $mailbox->setPath('draft');
+                    break;
                     default:
                         return redirect('mailbox');
                                 break;
@@ -290,7 +314,6 @@ class EMailerController extends Controller {
 //		exit;
 
 		$email_attachment = CepAttachmentFiles::where('attfiles_attachment_id',$mailbox['em_attachment'])->get();			
-
 		return view("mailbox.show",compact('mailbox','folder','unread_count','bool','oldmailbox','email_attachment'));
 	}
 
@@ -301,8 +324,32 @@ class EMailerController extends Controller {
          * @return Response
          */
 	public function deleteMessage($id){
-		CepEmailMessages::where('em_id',$id)->update(array('em_status'=>3));
+		//CepEmailMessages::where('em_id',$id)->update(array('em_status'=>3));
+		//return redirect('mailbox');
+		$message_data=CepEmailMessages::where('em_id',$id)->get();
+		$message_data_array = $message_data->toArray(); 
+		$from = $message_data_array[0]['em_from'];
+		$to = $message_data_array[0]['em_to'];
+		$trash_status = $message_data_array[0]['em_trash_status'];
+		$uid = Auth::id();
+		if($uid == $from){
+			if($trash_status == 0){
+				$trash_status_update = 1;
+			}
+			if($trash_status == 2){
+				$trash_status_update = 3;
+			}
+		} else{
+			if($trash_status == 0){
+				$trash_status_update = 2;
+			}
+			if($trash_status == 1){
+				$trash_status_update = 3;
+			}
+		}
+		CepEmailMessages::where('em_id',$id)->update(array('em_trash_status'=>$trash_status_update));
 		return redirect('mailbox');
+
 	}
 
         /**

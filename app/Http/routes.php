@@ -159,6 +159,7 @@ Route::get('download/{id}/s','DownloadController@simpleDownload');
 //Lahalle
 Route::get('client/lahalle/shoe/{id}','Client\LahalleController@shoeGen'); //Lahalle Sheo Generation
 Route::get('client/lahalle/cloth/{id}','Client\LahalleController@clothGen'); //Lahalle Sheo Generation
+Route::get('client/lahalle/xml','Client\LahalleController@xml'); // lahalle text xml 
 
 Route::get('client/korben/ref/{id}/{id2}','Client\KorbenController@ref'); //Korben reference Uplaod
 
