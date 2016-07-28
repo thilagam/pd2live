@@ -14,6 +14,9 @@ use App\CepItems;
 use App\CepProducts;
 use App\CepProductUsers;
 use App\CepDeveloperConfigurations;
+use App\CepDownloads;
+use App\CepUploads;
+use App\CepProductFtp;
 /* Facads */
 use DB;
 use Validator;
@@ -25,6 +28,7 @@ use Request;
 use App\Services\UploadsManager;
 use App\Libraries\EMailer;
 use App\Libraries\ActivityMainLib;
+use App\Libraries\FtpLib;
 
 
 class ClientController extends Controller
@@ -49,7 +53,7 @@ class ClientController extends Controller
         $this->manager=new UploadsManager;
         $this->emailActivity = new EMailer;
         $this->customactivity = new ActivityMainLib;
-
+        $this->ftpLib = new FtpLib();
     }
 
 
@@ -306,14 +310,17 @@ class ClientController extends Controller
 	        					);
 	        			CepProductUsers::create($productInchargeData);
         			}
+                    /* Add Developer Configs */
+                    $devConfArray=array(
+                                    array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_type','dconf_value'=>'','dconf_status'=>1),
+                                    array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_controller','dconf_value'=>'','dconf_status'=>1),
+                                    array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_library','dconf_value'=>'','dconf_status'=>1)
+                                    );
+                    $devConfigs=CepDeveloperConfigurations::insert($devConfArray);
+
+
         		}
-                /* Add Developer Configs */
-                $devConfArray=array(
-                                array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_type','dconf_value'=>'','dconf_status'=>1),
-                                array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_controller','dconf_value'=>'','dconf_status'=>1),
-                                array('dconf_id'=>'','dconf_product_id'=>$prod->prod_id,'dconf_name'=>'pdc_client_library','dconf_value'=>'','dconf_status'=>1)
-                                );
-                $devConfigs=CepDeveloperConfigurations::insert($devConfArray);
+                
         	}
 
                 /* Activity Email Alerts */
@@ -364,15 +371,51 @@ class ClientController extends Controller
     					    	->first()->toArray();
                 $products[$value['puser_product_id']]['item'] =  CepItems::where('item_product_id','=',$value['puser_product_id'])
                                 ->where('item_status',1)->get()->toArray();
+                $products[$value['puser_product_id']]['image'] = $this->getImage($value['puser_product_id']);
+                $products[$value['puser_product_id']]['upload'] = $this->getUpload($value['puser_product_id']);
             }
 		}
-
-
-
-		//echo "<pre>"; print_r($products);exit;
+        //echo "<pre>";print_r($products);exit;
+        
 		return view('client.profile',compact('client','products','country'));
 	}
 
+    public function getImage($id)
+    {
+        $imgCount = array();
+        $ftp_check = CepProductFtp::where('ftp_product_id',$id)->get();
+        $ftp_check = $ftp_check->toArray();
+        if(!empty($ftp_check))
+        {
+            $imgs=$this->ftpLib->collectImagesFromFtp($id);
+            foreach($imgs  as $key=>$value){
+                foreach($value as $k=>$v){
+                    $imgCount[] = $v;
+                }
+            }
+        }
+        return count($imgCount);
+    }
+
+    public function getUpload($id)
+    {
+        return CepUploads::where('upload_product_id',$id)->count();
+    }
+
+    public function getTotalRef($id)
+    {
+
+    }
+
+    public function getFileGen($id)
+    {
+
+    }
+
+    public function getRefWritten($id)
+    {
+        
+    }
 	/**
 	 * Show the form for editing the specified resource.
 	 *
@@ -548,7 +591,7 @@ class ClientController extends Controller
 
                     $this->customactivity->postActivity($act_options);
                     /* Close Activity Custom */
-                    /* Create Uploads Folder Entry */
+                    /* Create Uploads Folder Entry */ 
                     $this->manager->createDirectory($this->configs->uploads_products_path.$prod->prod_id);
                     chmod(public_path().$this->configs->uploads_path."/".$this->configs->uploads_products_path.$prod->prod_id, 0777);
                     /* Add Product Users for the new Product */

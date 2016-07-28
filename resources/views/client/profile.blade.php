@@ -154,15 +154,17 @@
 						</div>
 						<div class="col-sm-7">
 							<div class="col-sm-6">
+							@if($product['image'] > 1)
 							<div class="xe-widget xe-counter xe-counter-info col-sm-6" data-count=".num" data-from="1000" data-to="2470" data-duration="4" data-easing="true">
 								<div class="xe-icon">
 									<i class="fa-camera"></i>
 								</div>
 								<div class="xe-label">
-									<strong class="num">1200</strong>
+									<strong class="num">{{$product['image']}}</strong>
 									<span>Images</span>
 								</div>
 							</div>
+							@endif
 							<div class="xe-widget xe-counter xe-counter-info col-sm-6" data-count=".num" data-from="1000" data-to="2470" data-duration="4" data-easing="true">
 								<div class="xe-icon">
 									<i class="fa-star-o"></i>
@@ -184,13 +186,12 @@
 							</div>
 							<div class="col-sm-6">
 							
-						
 							<div class="xe-widget xe-counter xe-counter-info col-sm-6" data-count=".num" data-from="1000" data-to="2470" data-duration="4" data-easing="true">
 								<div class="xe-icon">
 									<i class=" fa-upload"></i>
 								</div>
 								<div class="xe-label">
-									<strong class="num">182</strong>
+									<strong class="num">{{$product['upload']}}</strong>
 									<span>Files Uploaded</span>
 								</div>
 							</div>
