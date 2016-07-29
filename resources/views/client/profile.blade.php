@@ -200,7 +200,7 @@
 									<i class=" fa-download"></i>
 								</div>
 								<div class="xe-label">
-									<strong class="num">120</strong>
+									<strong class="num">{{$product['gen']}}</strong>
 									<span>Files Generated</span>
 								</div>
 							</div>

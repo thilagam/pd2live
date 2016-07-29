@@ -373,6 +373,7 @@ class ClientController extends Controller
                                 ->where('item_status',1)->get()->toArray();
                 $products[$value['puser_product_id']]['image'] = $this->getImage($value['puser_product_id']);
                 $products[$value['puser_product_id']]['upload'] = $this->getUpload($value['puser_product_id']);
+                $products[$value['puser_product_id']]['gen'] = $this->getFileGen($value['puser_product_id']);
             }
 		}
         //echo "<pre>";print_r($products);exit;
@@ -409,7 +410,7 @@ class ClientController extends Controller
 
     public function getFileGen($id)
     {
-
+        return CepDownloads::where('download_product_id',$id)->count();
     }
 
     public function getRefWritten($id)
