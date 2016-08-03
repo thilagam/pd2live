@@ -141,7 +141,7 @@
 								<hr />
 								<ul class="list-unstyled user-friends-count">
 									<li>
-										<span>1200</span>
+										<span>{{$imgCount}}</span>
 										{{ $dictionary['prd_product_images_count'] }}
 									</li>
 									<li>

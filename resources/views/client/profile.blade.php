@@ -83,7 +83,7 @@
 						Products
 					</li>
 					<li>
-						<span>7</span>
+						<span>{{$itemCount}}</span>
 						Developments
 					</li>
 				</ul>

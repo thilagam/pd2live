@@ -26,7 +26,7 @@ use App\CepItemConfigurations;
 use DB; 
 use Validator;  
 use Auth; 
-use Input; 
+use Input;  
 use Request; 
 use Crypt;
 use Config;
@@ -45,6 +45,7 @@ use App\Libraries\ProductHelper;
 use App\Libraries\EMailer; 
 use App\Libraries\ActivityMainLib;
 use App\Libraries\ExcelLib;
+use App\Libraries\StatsLib;
 
 class ProductController extends Controller {
 
@@ -79,6 +80,7 @@ class ProductController extends Controller {
 
     	$this->emailActivity = new EMailer;
         $this->customactivity = new ActivityMainLib;
+        $this->statsLib = new StatsLib();
 
     }
 
@@ -373,10 +375,12 @@ class ProductController extends Controller {
 
         $allProductItems = CepItems::where('item_product_id',$id)->where('item_status',1)->get();
         $variablesArray[]= 'allProductItems';
-
-		//echo $product_items;
+        $imgCount = $this->statsLib->getImage($id);
+        $variablesArray[] = 'imgCount';
+       //echo $product_items;
 		/* Add Veriables based on satisfied conditions  */
 		return view('product.show',compact($variablesArray));
+		//return view('product.show')->with(array('variablesArray'=>$variablesArray,'imgCount'=>$imgCount));
 	}
 
 	/**
@@ -427,7 +431,7 @@ class ProductController extends Controller {
 			Log::error($error);
 			return redirect('product');
 		}
-
+		$itemConfigs=new CepItemConfigurations;
 		/* Get Client Info */
 		$client= DB::table('cep_products')
                     ->select('id' ,
@@ -455,7 +459,7 @@ class ProductController extends Controller {
         {
                 return redirect()->back()->withErrors($validateFtp->errors());
         }
-        //if($ftpInfo['ftp']==1)
+        //if($ftpInfo['ftp']==1) 
         if(isset($ftpInfo['ftp']))
         {
 	   		$ftpData=CepProductFtp::where('ftp_product_id','=',$id)->first();
@@ -487,6 +491,12 @@ class ProductController extends Controller {
 				/* Create FTP folder in product folder */
 				$this->manager->createDirectory($this->configs->uploads_products_path.$id."/ftp");
                 chmod(public_path().$this->configs->uploads_path."/".$this->configs->uploads_products_path.$id."/ftp", 0777);
+
+                /* Create PDN Dev Configs */		
+                $devConfArray=array(	
+                				array('dconf_id'=>'','dconf_product_id'=>$id,'dconf_name'=>'pdc_client_pattern','dconf_value'=>'','dconf_status'=>1)
+                				);
+               	$devConfigsFtp=CepDeveloperConfigurations::insert($devConfArray);
 
 
 	   		}else{
@@ -522,6 +532,7 @@ class ProductController extends Controller {
    		}
 
    		/* PDN Update or Create */
+   		/* --------------------------------PDN----------------------------------------- */		
 
    		$pdnInfo = Request::only('pdnradio','path','pdn_ref');
    		/*$validatePdn = Validator::make($pdnInfo,[
@@ -604,16 +615,19 @@ class ProductController extends Controller {
 					
 					/* Save Default Item Configs Based on Template File  */		
 					$excel_lib=new ExcelLib();
-					$itemConfigs=new CepItemConfigurations;
+					
 					$validateOrigData=$excel_lib->fileValidate('templates/'.$name.".xlsx");
 					$insertItemOrigs=array();
+
+					
+
 					foreach ($validateOrigData as $key => $value) {
 						$insertItemOrigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_pdn','iconf_name'=>$key,'iconf_value'=>json_encode($value),'iconf_status'=>1);
 					}
 					$itemConfigs->insert($insertItemOrigs);
 
 
-				}
+				} 
 
 				/* Create PDN folder in product folder */
 				$this->manager->createDirectory($this->configs->uploads_products_path.$id."/pdn");
@@ -623,7 +637,10 @@ class ProductController extends Controller {
                 				array('dconf_id'=>'','dconf_product_id'=>$id,'dconf_name'=>'pdc_client_pdn_model','dconf_value'=>'','dconf_status'=>1)
                 				);
                	$devConfigspdn=CepDeveloperConfigurations::insert($devConfArray);                                    
-				/* Create PDN Item Configs */	
+				/* Default Item Conf insert */		
+				//Default Check upload flag
+				$insertDefPdnItemConfigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_pdn','iconf_name'=>'checkUploadFile','iconf_value'=>1,'iconf_status'=>1);
+				$itemConfigs->insert($insertDefPdnItemConfigs);
 
 
 			}
@@ -650,13 +667,34 @@ class ProductController extends Controller {
 								'reference_column'=>$pdnInfo['pdn_ref'],
 								'status'=>1
 							 );
-					$FileManager=new FileManager();
+					$FileManager=new FileManager(); 
 					$upload=$FileManager->upload($file,$options);
 					//echo "<pre>"; print_r($upload);exit;
 					$pdnData->pconf_template=(!is_null($upload))?$upload->upload_url:'';
+
+					/* Save Default Item Configs Based on Template File  */		
+					$excel_lib=new ExcelLib();
+					$itemConfigs=new CepItemConfigurations();
+					$productHelper=new ProductHelper();
+					$validateOrigData=$excel_lib->fileValidate('templates/'.$name.".xlsx");
+
+					$pdnItemConf=$productHelper->getItemDevConfigs($id,'link_pdn');
+					$insertItemOrigs=array();
+					//Insert New or Update old 
+					foreach ($validateOrigData as $key => $value) {
+						if(!array_key_exists($key,$pdnItemConf)){
+							$insertItemOrigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_pdn','iconf_name'=>$key,'iconf_value'=>json_encode($value),'iconf_status'=>1);
+						}else{
+							CepItemConfigurations::where('iconf_product_id', '=', $id)->where('iconf_item_id', '=','link_pdn')->where('iconf_name', '=',$key)->update(['iconf_value' => json_encode($value)]);
+						}
+					}
+					$itemConfigs->insert($insertItemOrigs);	
+
+
 				}else{
 					$upload=false;
 				}
+
 				$pdnData->pconf_product_id=$id;
 				$pdnData->pconf_type='pdn';
 				$pdnData->pconf_path=$pdnInfo['path'];
@@ -690,7 +728,7 @@ class ProductController extends Controller {
 
 		}
 		/* END */		
-
+		/* ------------------------------------REF---------------------------------------------- */		
 		/* REF SECTION STARTS */		
 		/* Ref Update or Create */
    		$refInfo = Request::only('refradio','ref_path','ref_ref');
@@ -784,11 +822,15 @@ class ProductController extends Controller {
 				$this->manager->createDirectory($this->configs->uploads_products_path.$id."/ref");
                 chmod(public_path().$this->configs->uploads_path."/".$this->configs->uploads_products_path.$id."/ref", 0777);
                 /* REF Dev configs  */		
-                /* Create PDN Dev Configs */		
+                /* Create REF Dev Configs */		
                 $devConfArray=array(	
                 				array('dconf_id'=>'','dconf_product_id'=>$id,'dconf_name'=>'pdc_client_ref_model','dconf_value'=>'','dconf_status'=>1)
                 				);
                	$devConfigsref=CepDeveloperConfigurations::insert($devConfArray);
+
+               	//Default Check upload flag
+				$insertDefRefItemConfigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_ref','iconf_name'=>'checkUploadFile','iconf_value'=>1,'iconf_status'=>1);
+				$itemConfigs->insert($insertDefRefItemConfigs);
 
 			}else{
 				/* REF Template */
@@ -815,16 +857,23 @@ class ProductController extends Controller {
 					$upload=$FileManager->upload($file,$options);
 					$refData->pconf_template=(!is_null($upload))?$upload->upload_url:'';
 
-					/* Item Configs For the Ref File and Item */		
+					/* Save Default Item Configs Based on Template File  */		
 					$excel_lib=new ExcelLib();
-					$itemConfigs=new CepItemConfigurations;
+					$itemConfigs=new CepItemConfigurations();
+					$productHelper=new ProductHelper();
 					$validateOrigData=$excel_lib->fileValidate('templates/'.$name.".xlsx");
-					//echo "<pre>"; print_r($validateOrigData);exit;
+
+					$refItemConf=$productHelper->getItemDevConfigs($id,'link_ref');
 					$insertItemOrigs=array();
+					//Insert New or Update old 
 					foreach ($validateOrigData as $key => $value) {
-						$insertItemOrigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_ref','iconf_name'=>$key,'iconf_value'=>json_encode($value),'iconf_status'=>1);
+						if(!array_key_exists($key,$refItemConf)){
+							$insertItemOrigs[]=array('iconf_id'=>'','iconf_product_id'=>$id,'iconf_item_id'=>'link_ref','iconf_name'=>$key,'iconf_value'=>json_encode($value),'iconf_status'=>1);
+						}else{
+							CepItemConfigurations::where('iconf_product_id', '=', $id)->where('iconf_item_id', '=','link_ref')->where('iconf_name', '=',$key)->update(['iconf_value' => json_encode($value)]);
+						}
 					}
-					$itemConfigs->insert($insertItemOrigs);
+					$itemConfigs->insert($insertItemOrigs);	
 
 				}else{
 					$upload=false;

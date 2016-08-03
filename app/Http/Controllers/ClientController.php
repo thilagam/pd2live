@@ -17,6 +17,7 @@ use App\CepDeveloperConfigurations;
 use App\CepDownloads;
 use App\CepUploads;
 use App\CepProductFtp;
+
 /* Facads */
 use DB;
 use Validator;
@@ -29,6 +30,7 @@ use App\Services\UploadsManager;
 use App\Libraries\EMailer;
 use App\Libraries\ActivityMainLib;
 use App\Libraries\FtpLib;
+use App\Libraries\StatsLib;
 
 
 class ClientController extends Controller
@@ -54,6 +56,7 @@ class ClientController extends Controller
         $this->emailActivity = new EMailer;
         $this->customactivity = new ActivityMainLib;
         $this->ftpLib = new FtpLib();
+        $this->statsLib = new StatsLib();
     }
 
 
@@ -355,7 +358,8 @@ class ClientController extends Controller
 	 */
 	public function show($id)
 	{
-		/* Get Bo Users to Select incharge  */
+		//echo $this->statsLib->getImage($id);exit;
+        /* Get Bo Users to Select incharge  */
         $client=User::with('userPlus','productUser')
 						->where('id','=',$id)
 						->first()->toArray();
@@ -371,14 +375,18 @@ class ClientController extends Controller
     					    	->first()->toArray();
                 $products[$value['puser_product_id']]['item'] =  CepItems::where('item_product_id','=',$value['puser_product_id'])
                                 ->where('item_status',1)->get()->toArray();
-                $products[$value['puser_product_id']]['image'] = $this->getImage($value['puser_product_id']);
-                $products[$value['puser_product_id']]['upload'] = $this->getUpload($value['puser_product_id']);
-                $products[$value['puser_product_id']]['gen'] = $this->getFileGen($value['puser_product_id']);
+                $products[$value['puser_product_id']]['image'] = $this->statsLib->getImage($value['puser_product_id']);
+                $products[$value['puser_product_id']]['upload'] = $this->statsLib->getUpload($value['puser_product_id']);
+                $products[$value['puser_product_id']]['gen'] = $this->statsLib->getFileGen($value['puser_product_id']);
+                
             }
 		}
-        //echo "<pre>";print_r($products);exit;
-        
-		return view('client.profile',compact('client','products','country'));
+        $itemCount = 0;
+        foreach($products as $prods){
+           $itemCount = $itemCount + count($prods['item']);
+        }
+
+		return view('client.profile',compact('client','products','country','itemCount'));
 	}
 
     public function getImage($id)
